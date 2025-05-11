@@ -8,14 +8,15 @@ public class CarteFactory {
     private static final List<Carte> ALL_CARDS = new ArrayList<>();
 
     static {
-        ALL_CARDS.add(new Carte("Pikachu", "Électrik", 60, "/images/pikachu.png"));
-        ALL_CARDS.add(new Carte("Salamèche", "Feu", 50, "/images/salameche.png"));
-        ALL_CARDS.add(new Carte("Carapuce", "Eau", 50, "/images/carapuce.png"));
-        ALL_CARDS.add(new Carte("Bulbizarre", "Plante", 60, "/images/bulbizarre.png"));
-        ALL_CARDS.add(new Carte("Rondoudou", "Fée", 70, "/images/rondoudou.png"));
-        ALL_CARDS.add(new Carte("Miaouss", "Normal", 40, "/images/miaouss.png"));
-        ALL_CARDS.add(new Carte("Roucool", "Vol", 45, "/images/roucool.png"));
-        ALL_CARDS.add(new Carte("Évoli", "Normal", 60, "/images/evoli.png"));
+        // Pour chaque carte, on précise maintenant les dégâts
+        ALL_CARDS.add(new Carte("Pikachu",    "Électrik", 60, 20));
+        ALL_CARDS.add(new Carte("Salamèche",  "Feu",      50, 15));
+        ALL_CARDS.add(new Carte("Carapuce",   "Eau",      50, 10));
+        ALL_CARDS.add(new Carte("Bulbizarre", "Plante",   60, 12));
+        ALL_CARDS.add(new Carte("Rondoudou",  "Fée",      70,  8));
+        ALL_CARDS.add(new Carte("Miaouss",    "Normal",   40, 10));
+        ALL_CARDS.add(new Carte("Roucool",    "Vol",      45, 14));
+        ALL_CARDS.add(new Carte("Évoli",      "Normal",   60, 18));
     }
 
     public static List<Carte> genererBooster(int nombre) {
@@ -23,3 +24,4 @@ public class CarteFactory {
         return new ArrayList<>(ALL_CARDS.subList(0, nombre));
     }
 }
+

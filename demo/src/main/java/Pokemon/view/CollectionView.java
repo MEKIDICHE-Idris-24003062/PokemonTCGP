@@ -21,9 +21,7 @@ public class CollectionView {
         Label titre = new Label("Ma Collection");
         titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        FlowPane cartesPane = new FlowPane();
-        cartesPane.setHgap(10);
-        cartesPane.setVgap(10);
+        FlowPane cartesPane = new FlowPane(10, 10);
         cartesPane.setAlignment(Pos.CENTER);
 
         List<Carte> collection = CollectionJoueur.getCartesPossedees();
@@ -31,29 +29,31 @@ public class CollectionView {
         if (collection.isEmpty()) {
             cartesPane.getChildren().add(new Label("Aucune carte pour l’instant..."));
         } else {
-            // Compter les occurrences par nom de carte
-            Map<String, Integer> counts = new LinkedHashMap<>();
-            Map<String, Carte> exempleCartes = new LinkedHashMap<>();
+            // Compter les occurrences et garder un exemple de carte
+            Map<String, Integer> counts       = new LinkedHashMap<>();
+            Map<String, Carte>   exempleCarte = new LinkedHashMap<>();
 
             for (Carte c : collection) {
                 String key = c.getNom();
                 counts.put(key, counts.getOrDefault(key, 0) + 1);
-                exempleCartes.putIfAbsent(key, c);
+                exempleCarte.putIfAbsent(key, c);
             }
 
-            // Pour chaque carte unique, afficher une seule vignette avec quantité
+            // Afficher chaque carte unique avec quantité et dégâts
             counts.forEach((nom, quantite) -> {
-                Carte exemple = exempleCartes.get(nom);
+                Carte carte = exempleCarte.get(nom);
+
                 VBox box = new VBox(5);
                 box.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightgreen;");
                 box.setAlignment(Pos.CENTER);
-                box.setPrefSize(120, 150);
+                box.setPrefSize(120, 170);
 
-                Label nomLabel = new Label(exemple.getNom() + (quantite > 1 ? " x" + quantite : ""));
-                Label typeLabel = new Label("Type : " + exemple.getType());
-                Label pvLabel = new Label("PV : " + exemple.getPv());
+                Label nomLabel    = new Label(carte.getNom() + (quantite > 1 ? " x" + quantite : ""));
+                Label typeLabel   = new Label("Type   : " + carte.getType());
+                Label pvLabel     = new Label("PV     : " + carte.getPv());
+                Label degatsLabel = new Label("Dégâts : " + carte.getDegats());  // ← affichage des dégâts
 
-                box.getChildren().addAll(nomLabel, typeLabel, pvLabel);
+                box.getChildren().addAll(nomLabel, typeLabel, pvLabel, degatsLabel);
                 cartesPane.getChildren().add(box);
             });
         }
@@ -65,7 +65,6 @@ public class CollectionView {
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 30;");
 
-        Scene scene = new Scene(layout, 800, 600);
-        stage.setScene(scene);
+        stage.setScene(new Scene(layout, 800, 600));
     }
 }

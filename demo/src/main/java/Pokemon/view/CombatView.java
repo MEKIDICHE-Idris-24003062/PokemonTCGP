@@ -1,72 +1,124 @@
 package Pokemon.view;
-// CombatView.java
+
 import Pokemon.model.Carte;
 import Pokemon.model.CarteFactory;
+import Pokemon.model.CollectionJoueur;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CombatView {
 
     private int pvJoueur;
     private int pvIA;
+    private int degatsJoueur;
+    private int degatsIA;
     private Label pvJoueurLabel;
     private Label pvIALabel;
 
     public void afficher(Stage stage) {
-        // Choisir un Pokémon pour chaque joueur
-        Carte joueur = CarteFactory.genererBooster(1).get(0);
-        Carte ia = CarteFactory.genererBooster(1).get(0);
+        // 1) Sélection du Pokémon dans ta collection
+        List<Carte> possedees = CollectionJoueur.getCartesPossedees();
+        if (possedees.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                    "Tu n'as aucune carte en collection.\nOuvre un booster d'abord !",
+                    ButtonType.OK);
+            alert.showAndWait();
+            new AccueilView().afficher(stage);
+            return;
+        }
 
-        pvJoueur = joueur.getPv();
-        pvIA = ia.getPv();
+        // Récupérer une liste unique (une carte par nom)
+        Map<String, Carte> uniques = new LinkedHashMap<>();
+        for (Carte c : possedees) {
+            uniques.putIfAbsent(c.getNom(), c);
+        }
 
-        Label titre = new Label("Combat Pokémon !");
-        titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        ComboBox<Carte> combo = new ComboBox<>();
+        combo.getItems().addAll(uniques.values());
+        combo.setPromptText("Choisis ton Pokémon");
 
-        Label nomJoueur = new Label("Ton Pokémon : " + joueur.getNom());
-        Label nomIA = new Label("Adversaire : " + ia.getNom());
-
-        pvJoueurLabel = new Label("PV : " + pvJoueur);
-        pvIALabel = new Label("PV : " + pvIA);
-
-        Button attaquerBtn = new Button("Attaquer");
-        attaquerBtn.setOnAction(e -> attaquer(joueur, ia));
+        Button startBtn = new Button("Commencer le combat");
+        startBtn.setOnAction(e -> {
+            Carte joueur = combo.getValue();
+            if (joueur == null) return;
+            // Initialise PV et dégâts
+            pvJoueur   = joueur.getPv();
+            degatsJoueur = joueur.getDegats();
+            // Prépare l'IA
+            Carte adversaire = CarteFactory.genererBooster(1).get(0);
+            pvIA     = adversaire.getPv();
+            degatsIA = adversaire.getDegats();
+            afficherCombat(stage, joueur, adversaire);
+        });
 
         Button retourBtn = new Button("Retour à l'accueil");
         retourBtn.setOnAction(e -> new AccueilView().afficher(stage));
 
-        VBox layout = new VBox(20, titre, nomJoueur, pvJoueurLabel, nomIA, pvIALabel, attaquerBtn, retourBtn);
-        layout.setAlignment(Pos.CENTER);
-        layout.setStyle("-fx-padding: 30;");
+        VBox selectionLayout = new VBox(15,
+                new Label("Sélectionne ton Pokémon pour le combat :"),
+                combo,
+                startBtn,
+                retourBtn
+        );
+        selectionLayout.setAlignment(Pos.CENTER);
+        selectionLayout.setStyle("-fx-padding: 30;");
 
-        Scene scene = new Scene(layout, 800, 600);
-        stage.setScene(scene);
+        stage.setScene(new Scene(selectionLayout, 800, 600));
     }
 
-    private void attaquer(Carte joueur, Carte ia) {
-        int degats = 20; // attaque fixe pour l’instant
+    private void afficherCombat(Stage stage, Carte joueur, Carte ia) {
+        Label titre = new Label("Combat Pokémon !");
+        titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        // Le joueur attaque l’IA
-        pvIA -= degats;
-        if (pvIA < 0) pvIA = 0;
+        Label nomJoueur = new Label("Ton Pokémon : " + joueur.getNom());
+        Label nomIA     = new Label("Adversaire   : " + ia.getNom());
 
-        // Si l’IA est KO, fin du combat
-        if (pvIA == 0) {
-            pvIALabel.setText("PV : 0 - Gagné !");
-            return;
-        }
+        pvJoueurLabel = new Label("PV : " + pvJoueur);
+        pvIALabel     = new Label("PV : " + pvIA);
 
-        // L’IA attaque le joueur
-        pvJoueur -= 15; // dégâts IA
-        if (pvJoueur < 0) pvJoueur = 0;
+        Button attaquerBtn = new Button(
+                "Attaquer (" + degatsJoueur + " dégâts)"
+        );
+        attaquerBtn.setOnAction(e -> {
+            // Joueur attaque
+            pvIA = Math.max(0, pvIA - degatsJoueur);
+            pvIALabel.setText("PV : " + pvIA + (pvIA == 0 ? " – Gagné !" : ""));
 
-        // Afficher PV mis à jour
-        pvJoueurLabel.setText("PV : " + pvJoueur + (pvJoueur == 0 ? " - Perdu !" : ""));
-        pvIALabel.setText("PV : " + pvIA);
+            if (pvIA == 0) {
+                attaquerBtn.setDisable(true);
+                return;
+            }
+
+            // IA contre-attaque
+            pvJoueur = Math.max(0, pvJoueur - degatsIA);
+            pvJoueurLabel.setText("PV : " + pvJoueur + (pvJoueur == 0 ? " – Perdu !" : ""));
+
+            if (pvJoueur == 0) {
+                attaquerBtn.setDisable(true);
+            }
+        });
+
+        Button retourBtn = new Button("Retour à l'accueil");
+        retourBtn.setOnAction(e -> new AccueilView().afficher(stage));
+
+        VBox combatLayout = new VBox(15,
+                titre,
+                nomJoueur, pvJoueurLabel,
+                nomIA,    pvIALabel,
+                attaquerBtn,
+                retourBtn
+        );
+        combatLayout.setAlignment(Pos.CENTER);
+        combatLayout.setStyle("-fx-padding: 30;");
+
+        stage.setScene(new Scene(combatLayout, 800, 600));
     }
 }

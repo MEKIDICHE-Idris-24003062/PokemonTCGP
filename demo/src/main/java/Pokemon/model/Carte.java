@@ -4,13 +4,13 @@ public class Carte {
     private String nom;
     private String type;
     private int pv;
-    private String imagePath; // <-- ajout
+    private int degats;   // ← nouveau
 
-    public Carte(String nom, String type, int pv, String imagePath) {
-        this.nom = nom;
-        this.type = type;
-        this.pv = pv;
-        this.imagePath = imagePath;
+    public Carte(String nom, String type, int pv, int degats) {
+        this.nom    = nom;
+        this.type   = type;
+        this.pv     = pv;
+        this.degats = degats;
     }
 
     public String getNom() {
@@ -25,8 +25,14 @@ public class Carte {
         return pv;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public int getDegats() {    // ← nouveau getter
+        return degats;
+    }
+
+    @Override
+    public String toString() {
+        return nom;
     }
 }
+
 
