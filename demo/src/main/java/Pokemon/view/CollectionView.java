@@ -61,6 +61,7 @@ public class CollectionView {
         Button retourBtn = new Button("Retour à l'accueil");
         retourBtn.setOnAction(e -> new AccueilView().afficher(stage));
 
+
         VBox layout = new VBox(20, titre, cartesPane, retourBtn);
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 30;");
