@@ -11,7 +11,7 @@ public class CarteFactory {
     private static final List<Carte> ALL_CARDS = new ArrayList<>();
 
     static {
-        try (InputStream is = CarteFactory.class.getResourceAsStream("/gen1.csv");
+        try (InputStream is = CarteFactory.class.getResourceAsStream("/Pokemon/gen1.csv");
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             String line;
             while ((line = br.readLine()) != null) {
